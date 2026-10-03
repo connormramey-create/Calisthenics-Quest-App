@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- iOS Web App PWA Meta Tags -->
+    <!-- iOS Web App PWA Meta Tags (Fixed Status Bar Mode) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Cali RPG">
     <meta name="theme-color" content="#0F172A">
     
@@ -37,21 +37,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* Custom Safe Area Padding for iOS Notch & Home Bar */
-        .pt-safe {
-            padding-top: env(safe-area-inset-top, 1rem);
+        /* Safe Area Offsets for iOS Notch & Dynamic Island */
+        .pt-safe-top {
+            padding-top: max(env(safe-area-inset-top), 2.75rem);
         }
-        .pb-safe {
-            padding-bottom: env(safe-area-inset-bottom, 1rem);
-        }
-        .top-safe {
-            top: env(safe-area-inset-top, 0px);
+        .pb-safe-bottom {
+            padding-bottom: max(env(safe-area-inset-bottom), 1.5rem);
         }
 
-        /* Custom Scrollbar Styling */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
-            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: rgba(15, 23, 42, 0.6);
@@ -60,11 +56,7 @@
             background: rgba(51, 65, 85, 0.8);
             border-radius: 9999px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(71, 85, 105, 1);
-        }
 
-        /* Pulse Animations for Active Timers */
         @keyframes subtle-pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.85; transform: scale(0.98); }
@@ -73,7 +65,6 @@
             animation: subtle-pulse 1.5s infinite ease-in-out;
         }
 
-        /* Prevent text selection on quick interactive taps */
         .no-select {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -81,14 +72,12 @@
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950 no-select pb-safe">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950 no-select pb-safe-bottom">
 
-    <!-- -->
     <!-- MAIN NAVIGATION & HERO STATUS BAR -->
-    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 pt-safe px-4 py-3 shadow-lg">
+    <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800/80 pt-safe-top px-4 py-3 shadow-lg">
         <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             
-            <!-- App Logo & Level Stats -->
             <div class="flex items-center justify-between w-full sm:w-auto gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-md shadow-amber-500/20">
@@ -100,14 +89,12 @@
                     </div>
                 </div>
 
-                <!-- Level Badge (Mobile Right) -->
                 <div class="sm:hidden flex flex-col items-end">
                     <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Level</span>
                     <span id="mobile-level-num" class="text-xl font-extrabold text-amber-400">1</span>
                 </div>
             </div>
 
-            <!-- XP Progress Bar & Stats Pill -->
             <div class="w-full sm:w-80 flex flex-col gap-1.5">
                 <div class="flex justify-between items-center text-xs font-semibold">
                     <span class="text-slate-300 flex items-center gap-1.5">
@@ -121,7 +108,6 @@
                 </div>
             </div>
 
-            <!-- Global Action Controls (Export/Import & Reset) -->
             <div class="hidden md:flex items-center gap-2">
                 <button onclick="exportData()" title="Backup Progress" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
                     <i class="fa-solid fa-download text-sm"></i>
@@ -137,11 +123,9 @@
         </div>
     </header>
 
-    <!-- -->
     <!-- MAIN APPLICATION CONTAINER -->
     <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- Top Action Card: Quest Generator Launcher -->
         <section class="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 rounded-2xl p-5 border border-amber-500/30 shadow-xl relative overflow-hidden">
             <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
             
@@ -170,7 +154,7 @@
             </div>
         </section>
 
-        <!-- Skill Branch Selector Tabs -->
+        <!-- Skill Branch Tabs -->
         <nav class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-slate-800">
             <button onclick="switchBranch('push')" id="tab-push" class="branch-tab active px-4 py-2.5 rounded-xl font-bold text-sm whitespace-nowrap transition flex items-center gap-2 bg-amber-500 text-slate-950 shadow-md">
                 <i class="fa-solid fa-hand-fist"></i> Push Branch
@@ -189,54 +173,44 @@
             </button>
         </nav>
 
-        <!-- Skill Tree Nodes Container -->
         <section id="skill-tree-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Skill Nodes dynamically populated by JS -->
         </section>
 
     </main>
 
-    <!-- -->
-    <!-- QUEST EXECUTION MODAL / OVERLAY SCREEN -->
-    <!-- FIXED: Added pt-12, top-safe, and independent max-height scrolling container to ensure controls are never cut off -->
-    <div id="quest-modal" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col hidden transition-opacity duration-300">
+    <!-- QUEST EXECUTION MODAL / OVERLAY SCREEN (FIXED OVERLAP & SCROLL) -->
+    <div id="quest-modal" class="fixed inset-0 z-50 bg-slate-950 flex flex-col hidden">
         
-        <!-- STICKY TOP HEADER CONTROL BAR (Fixed clearance for iOS Notch & Control Buttons) -->
-        <header class="sticky top-0 z-20 bg-slate-900 border-b border-slate-800 px-4 py-3 sm:px-6 pt-safe shadow-2xl flex-none">
-            <div class="max-w-3xl mx-auto flex items-center justify-between gap-3">
+        <!-- HEADER WITH HARD PADDING CLEARANCE FOR IPHONE STATUS BAR -->
+        <header class="bg-slate-900 border-b border-slate-800 px-4 pb-3 pt-safe-top shadow-2xl flex-none z-10">
+            <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
                 
-                <!-- Left: Cancel Quest Button -->
-                <button onclick="cancelQuest()" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-800/80 text-xs font-bold transition flex items-center gap-1.5">
+                <button onclick="cancelQuest()" class="px-3 py-2 rounded-xl bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-800/80 text-xs font-bold transition flex items-center gap-1.5 shrink-0">
                     <i class="fa-solid fa-xmark text-sm"></i>
-                    <span>Cancel Quest</span>
+                    <span>Cancel</span>
                 </button>
 
-                <!-- Center: Quest Title & Rest Timer Indicator -->
-                <div class="text-center flex-1 min-w-0">
-                    <h3 id="quest-title-text" class="text-sm sm:text-base font-extrabold text-amber-400 truncate">ACTIVE QUEST</h3>
-                    <div id="modal-rest-timer-badge" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold timer-pulse">
+                <div class="text-center flex-1 min-w-0 px-1">
+                    <h3 id="quest-title-text" class="text-xs sm:text-sm font-extrabold text-amber-400 truncate tracking-wide uppercase">ACTIVE QUEST</h3>
+                    <div id="modal-rest-timer-badge" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold timer-pulse mt-0.5">
                         <i class="fa-solid fa-stopwatch text-xs"></i> REST: <span id="modal-rest-time">60</span>s
                     </div>
                 </div>
 
-                <!-- Right: Progress Tracker -->
-                <div class="text-right flex-none">
-                    <span class="text-xs text-slate-400 block font-semibold">PROGRESS</span>
-                    <span id="quest-progress-text" class="text-xs sm:text-sm font-black text-slate-200">0 / 0 Sets</span>
+                <div class="text-right shrink-0">
+                    <span class="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Progress</span>
+                    <span id="quest-progress-text" class="text-xs sm:text-sm font-black text-slate-200 font-mono">0 / 0 Sets</span>
                 </div>
             </div>
 
-            <!-- Overall Quest Progress Bar Line -->
-            <div class="max-w-3xl mx-auto w-full bg-slate-800 h-1.5 rounded-full mt-2.5 overflow-hidden">
+            <div class="max-w-3xl mx-auto w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
                 <div id="quest-modal-progress-bar" class="bg-amber-400 h-full w-0 transition-all duration-300"></div>
             </div>
         </header>
 
-        <!-- INDEPENDENTLY SCROLLABLE EXERCISE CONTENT CONTAINER -->
-        <!-- FIXED: Added flex-1 overflow-y-auto max-h-screen container so workout list scrolls smoothly below header -->
-        <div class="flex-1 overflow-y-auto p-4 sm:p-6 pb-24 max-w-3xl w-full mx-auto space-y-6">
+        <!-- INDEPENDENT SCROLLABLE BODY CONTAINER -->
+        <div class="flex-1 overflow-y-auto p-4 sm:p-6 pb-32 max-w-3xl w-full mx-auto space-y-4">
             
-            <!-- Rest Timer Controller Banner (Inside Scroll View) -->
             <div id="rest-timer-card" class="hidden bg-slate-900/90 border border-amber-500/40 rounded-2xl p-4 text-center space-y-2 shadow-lg">
                 <div class="text-xs font-bold uppercase tracking-widest text-amber-400">Rest Interval Active</div>
                 <div id="rest-timer-display" class="text-4xl font-mono font-black text-amber-300">01:00</div>
@@ -246,14 +220,12 @@
                 </div>
             </div>
 
-            <!-- List of Exercises in Quest -->
             <div id="quest-exercise-list" class="space-y-4">
-                <!-- Dynamically Rendered Exercise Cards -->
             </div>
         </div>
 
-        <!-- STICKY BOTTOM ACTION FOOTER -->
-        <footer class="fixed bottom-0 left-0 right-0 z-20 bg-slate-900/95 border-t border-slate-800 p-4 pb-safe backdrop-blur-lg">
+        <!-- FIXED FOOTER BUTTON -->
+        <footer class="fixed bottom-0 left-0 right-0 z-20 bg-slate-900/95 border-t border-slate-800 p-4 pb-safe-bottom backdrop-blur-lg">
             <div class="max-w-3xl mx-auto flex items-center justify-between gap-4">
                 <div class="text-xs text-slate-400">
                     Reward: <span id="quest-reward-xp" class="text-amber-400 font-bold text-sm">+50 XP</span>
@@ -265,16 +237,9 @@
         </footer>
     </div>
 
-    <!-- NOTIFICATION TOAST OVERLAY -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- -->
     <script>
-        /* ==========================================================================
-           1. DATA STRUCTURES & SKILL TREE CONFIGURATION
-           ========================================================================== */
-        
-        // Skill Database covering 5 Branches with tier progressions
         const SKILL_TREE = {
             push: [
                 { id: 'wall_pushup', name: 'Wall Push-Ups', tier: 1, xpReq: 0, reqs: [], desc: 'Foundation push movement for joints and upper chest.' },
@@ -328,12 +293,11 @@
             ]
         };
 
-        // Player State Storage Structure
         let gameState = {
             xp: 0,
             level: 1,
             unlockedSkills: ['wall_pushup', 'wall_pull', 'plank_knee', 'box_squat', 'wall_plank'],
-            skillProficiency: {}, // tracks sets/reps completed per skill
+            skillProficiency: {},
             currentBranch: 'push',
             activeQuest: null
         };
@@ -341,9 +305,6 @@
         let restTimerInterval = null;
         let restTimeRemaining = 0;
 
-        /* ==========================================================================
-           2. INITIALIZATION & STORAGE ENGINE
-           ========================================================================== */
         window.onload = function() {
             loadGameData();
             updateUI();
@@ -377,9 +338,6 @@
             }
         }
 
-        /* ==========================================================================
-           3. UI UPDATER & LEVEL CALCULATION
-           ========================================================================== */
         function getRequiredXP(level) {
             return Math.floor(100 * Math.pow(1.25, level - 1));
         }
@@ -393,7 +351,6 @@
         }
 
         function updateUI() {
-            // Level Calculation
             let reqXP = getRequiredXP(gameState.level);
             while (gameState.xp >= reqXP) {
                 gameState.xp -= reqXP;
@@ -402,7 +359,6 @@
                 showToast(`LEVEL UP! You reached Level ${gameState.level}!`, 'success');
             }
 
-            // Update DOM Elements
             document.getElementById('level-num').innerText = gameState.level;
             document.getElementById('mobile-level-num').innerText = gameState.level;
             document.getElementById('current-xp').innerText = gameState.xp;
@@ -436,9 +392,6 @@
             }, 3000);
         }
 
-        /* ==========================================================================
-           4. SKILL TREE RENDERER & UNLOCK ENGINE
-           ========================================================================== */
         function switchBranch(branch) {
             gameState.currentBranch = branch;
             
@@ -462,9 +415,7 @@
 
         function canUnlockSkill(skill) {
             if (isSkillUnlocked(skill.id)) return false;
-            // Check prerequisites
-            const reqsMet = skill.reqs.every(reqId => gameState.unlockedSkills.includes(reqId));
-            return reqsMet;
+            return skill.reqs.every(reqId => gameState.unlockedSkills.includes(reqId));
         }
 
         function unlockSkill(skillId) {
@@ -555,9 +506,6 @@
             updateUI();
         }
 
-        /* ==========================================================================
-           5. QUEST GENERATOR & EXECUTION MODAL ENGINE
-           ========================================================================== */
         function generateWorkoutQuest() {
             const focus = document.getElementById('quest-focus-select').value;
             let eligibleSkills = [];
@@ -566,7 +514,7 @@
                 for (let branch in SKILL_TREE) {
                     const unlockedInBranch = SKILL_TREE[branch].filter(s => gameState.unlockedSkills.includes(s.id));
                     if (unlockedInBranch.length > 0) {
-                        eligibleSkills.push(unlockedInBranch[unlockedInBranch.length - 1]); // peak unlocked skill
+                        eligibleSkills.push(unlockedInBranch[unlockedInBranch.length - 1]);
                     }
                 }
             } else {
@@ -579,7 +527,6 @@
                 return;
             }
 
-            // Build quest structure (3 sets per exercise)
             const questExercises = eligibleSkills.map(skill => ({
                 id: skill.id,
                 name: skill.name,
@@ -661,7 +608,7 @@
             } else {
                 ex.completedSets++;
                 gameState.activeQuest.completedSetsCount++;
-                startRestTimer(60); // 60s Rest interval on set completion
+                startRestTimer(60);
             }
 
             renderQuestExercises();
@@ -687,9 +634,6 @@
             }
         }
 
-        /* ==========================================================================
-           6. REST TIMER & AUDIO SOUND ENGINE
-           ========================================================================== */
         function startRestTimer(seconds) {
             clearInterval(restTimerInterval);
             restTimeRemaining = seconds;
@@ -743,7 +687,7 @@
                 const gain = ctx.createGain();
 
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
                 gain.gain.setValueAtTime(0.1, ctx.currentTime);
 
                 osc.connect(gain);
@@ -752,7 +696,7 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.3);
             } catch (e) {
-                console.log("Audio not supported or allowed without interaction.");
+                console.log("Audio play suppressed.");
             }
         }
 
@@ -779,9 +723,6 @@
             updateUI();
         }
 
-        /* ==========================================================================
-           7. DATA BACKUP & RESTORE ENGINE
-           ========================================================================== */
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState));
             const dlAnchorElem = document.createElement('a');
